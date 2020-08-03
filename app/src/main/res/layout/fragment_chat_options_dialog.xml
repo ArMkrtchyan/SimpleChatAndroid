@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="onEditClick"
+            type="android.view.View.OnClickListener" />
+
+        <variable
+            name="onDeleteClick"
+            type="android.view.View.OnClickListener" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        tools:context=".fragments.ChatOptionsDialogFragment">
+
+        <TextView
+            android:id="@+id/edit_chat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_edit"
+            android:drawablePadding="10dp"
+            android:onClick="@{onEditClick}"
+            android:padding="16dp"
+            android:text="Edit chat"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toTopOf="@id/delete_chat" />
+
+        <TextView
+            android:id="@+id/delete_chat"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_delete"
+            android:drawablePadding="10dp"
+            android:onClick="@{onDeleteClick}"
+            android:padding="16dp"
+            android:text="Delete chat"
+            android:textColor="@color/black"
+            android:textSize="18sp"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

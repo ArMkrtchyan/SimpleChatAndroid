@@ -1,0 +1,42 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="backgroundColor">#ffffff</item>
+        <item name="bottomNavigationBackgroundColor">#FFFFFF</item>
+        <item name="cardBackgroundColor">#ffffff</item>
+        <item name="strokeColor">#E9E9E9</item>
+        <item name="textColor">#000000</item>
+        <item name="linkTextColor">@color/colorPrimary</item>
+        <item name="bottomTextColor">@color/colorPrimary</item>
+        <item name="bottomTextColorUnSelected">@color/grey</item>
+        <item name="bottomIconColor">@color/colorPrimary</item>
+        <item name="bottomIconColorUnselected">@color/grey</item>
+        <item name="hintColor">@color/grey</item>
+        <item name="buttonColor">@color/colorPrimary</item>
+        <item name="statusBarColor">@color/white</item>
+        <item name="progressBackgroundColor">@color/colorPrimaryTransparent</item>
+        <item name="android:windowBackground">@color/white</item>
+        <item name="borderColor">@color/green</item>
+        <item name="buttonColorGradientStart">@color/colorPrimary</item>
+        <item name="buttonColorGradientEnd">#356EFF</item>
+        <item name="buttonColorDisabled">@color/colorPrimaryDisabled</item>
+    </style>
+
+    <!-- set the rounded drawable as background to your bottom sheet -->
+    <style name="BottomSheet" parent="@style/Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/main_background</item>
+    </style>
+
+    <style name="BaseBottomSheetDialog" parent="@style/Theme.Design.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheet</item>
+    </style>
+
+    <style name="BottomSheetDialogTheme" parent="BaseBottomSheetDialog" />
+</resources>
