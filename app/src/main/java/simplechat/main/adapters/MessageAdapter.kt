@@ -7,10 +7,8 @@ import androidx.recyclerview.widget.DiffUtil
 import simplechat.main.adapters.base.BaseAdapter
 import simplechat.main.adapters.base.BaseViewHolder
 import simplechat.main.adapters.diffutils.MessageDiffUtilCallback
-import simplechat.main.adapters.viewholders.MessageTextReceivedViewHolder
-import simplechat.main.adapters.viewholders.MessageTextSendViewHolder
-import simplechat.main.databinding.MessageTextReceivedItemBinding
-import simplechat.main.databinding.MessageTextSendItemBinding
+import simplechat.main.adapters.viewholders.*
+import simplechat.main.databinding.*
 import simplechat.main.models.Message
 import simplechat.main.utils.Utils
 import java.text.SimpleDateFormat
@@ -39,16 +37,18 @@ class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnMessageClickListene
                     MessageTextReceivedItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
             }
             typeMessagePhotoSend -> {
-                MessageTextSendViewHolder(MessageTextSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+                MessagePhotoSendViewHolder(MessagePhotoSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
             }
             typeMessagePhotoReceived -> {
-                MessageTextSendViewHolder(MessageTextSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+                MessagePhotoReceivedViewHolder(
+                    MessagePhotoReceivedItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
             }
             typeMessageFileSend -> {
-                MessageTextSendViewHolder(MessageTextSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+                MessageFileSendViewHolder(MessageFileSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
             }
             typeMessageFileReceived -> {
-                MessageTextSendViewHolder(MessageTextSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+                MessageFileReceivedViewHolder(
+                    MessageFileReceivedItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
             }
             else -> {
                 MessageTextSendViewHolder(MessageTextSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))

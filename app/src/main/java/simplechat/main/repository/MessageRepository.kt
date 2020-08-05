@@ -3,17 +3,20 @@ package simplechat.main.repository
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import simplechat.main.database.dao.MessageDao
+import simplechat.main.SimpleChatApplication
 import simplechat.main.database.entity.MessageEntity
 import simplechat.main.database.mappers.MessagesMapper
 import simplechat.main.models.Message
 
-class MessageRepository(private val messageDao: MessageDao) {
-    suspend fun insertMessage(message: MessageEntity): MutableLiveData<Message> {
+class MessageRepository {
+
+    private val messageDao = SimpleChatApplication.getInstance().getChatDb().messageDao()
+
+    suspend fun insertMessage(message: Message): MutableLiveData<Message> {
         val messagesLiveData = MutableLiveData<Message>()
-        withContext(Dispatchers.IO) { messageDao.insert(message) }
-        messagesLiveData.postValue(
-            MessagesMapper.messageEntityToMessage(withContext(Dispatchers.IO) { messageDao.getLastMessage(message.chatId) }))
+        withContext(Dispatchers.IO) { messageDao.insert(MessagesMapper.messageToMessageEntity(message)) }
+        val mMessage = withContext(Dispatchers.IO) { messageDao.getLastMessage(message.chatId) }
+        messagesLiveData.postValue(MessagesMapper.messageEntityToMessage(mMessage))
         return messagesLiveData
 
     }

@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.lifecycle.*
 import kotlinx.coroutines.launch
 import simplechat.main.adapters.ChatListAdapter
-import simplechat.main.database.ChatDB
 import simplechat.main.database.entity.ChatEntity
 import simplechat.main.database.mappers.ChatsMapper
 import simplechat.main.models.Chat
@@ -14,7 +13,7 @@ import simplechat.main.repository.ChatRepository
 class ChatListViewModel : ViewModel() {
 
     private lateinit var context: Context
-    private val chatsRepository by lazy { ChatRepository(ChatDB.getDatabase(context).chatDao()) }
+    private val chatsRepository by lazy { ChatRepository() }
     private val chatList = ArrayList<Chat>()
     private val chatListLiveData = MutableLiveData(chatList)
     private val chatListAdapter by lazy { ChatListAdapter() }

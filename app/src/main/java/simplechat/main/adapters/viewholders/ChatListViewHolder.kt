@@ -5,7 +5,7 @@ import simplechat.main.adapters.base.BaseViewHolder
 import simplechat.main.databinding.ChatListItemBinding
 import simplechat.main.models.Chat
 
-class ChatListViewHolder(val dataBinding: ChatListItemBinding) : BaseViewHolder<Chat, OnChatClickListener>(dataBinding.root) {
+class ChatListViewHolder(private val dataBinding: ChatListItemBinding) : BaseViewHolder<Chat, OnChatClickListener>(dataBinding.root) {
     override fun bind(item: Chat, onClickListener: OnChatClickListener?) {
         dataBinding.chat = item
         dataBinding.root.setOnClickListener {

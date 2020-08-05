@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "cd36adbad0a36a23f6ff40d8efebbc34",
+    "identityHash": "b23c498a0586a0eb9f8189ae60b8c03b",
     "entities": [
       {
         "tableName": "messages",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chat_id` INTEGER NOT NULL, `message` TEXT NOT NULL, `created_at` TEXT NOT NULL, `typed_user_id` INTEGER NOT NULL, `message_type` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chat_id` INTEGER NOT NULL, `message` TEXT NOT NULL, `created_at` TEXT NOT NULL, `typed_user_id` INTEGER NOT NULL, `message_type` INTEGER NOT NULL, `file_uri` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -42,6 +42,12 @@
             "fieldPath": "messageType",
             "columnName": "message_type",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uri",
+            "columnName": "file_uri",
+            "affinity": "TEXT",
             "notNull": true
           }
         ],
@@ -102,7 +108,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cd36adbad0a36a23f6ff40d8efebbc34')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b23c498a0586a0eb9f8189ae60b8c03b')"
     ]
   }
 }

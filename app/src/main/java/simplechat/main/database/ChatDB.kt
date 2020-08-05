@@ -31,6 +31,7 @@ abstract class ChatDB : RoomDatabase() {
                 return instance
             }
         }
+
     }
 
 }

@@ -9,8 +9,6 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 import simplechat.main.adapters.MessageAdapter
-import simplechat.main.database.ChatDB
-import simplechat.main.database.entity.MessageEntity
 import simplechat.main.database.mappers.ChatsMapper
 import simplechat.main.models.Chat
 import simplechat.main.models.Message
@@ -20,8 +18,8 @@ import simplechat.main.viewmodels.base.BaseViewModel
 
 class MessagesViewModel : BaseViewModel() {
     private lateinit var context: Context
-    private val messageRepository by lazy { MessageRepository(ChatDB.getDatabase(context).messageDao()) }
-    private val chatRepository by lazy { ChatRepository(ChatDB.getDatabase(context).chatDao()) }
+    private val messageRepository by lazy { MessageRepository() }
+    private val chatRepository by lazy { ChatRepository() }
     private val messageList = ArrayList<Message>()
     private val messageListLiveData = MutableLiveData(messageList)
     private val messageListAdapter by lazy { MessageAdapter() }
@@ -70,14 +68,14 @@ class MessagesViewModel : BaseViewModel() {
         }
     }
 
-    fun addMessage(messageEntity: MessageEntity, chat: Chat): MutableLiveData<Boolean> {
+    fun addMessage(message: Message, chat: Chat): MutableLiveData<Boolean> {
         val success = MutableLiveData<Boolean>()
         viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
             Log.e("DBEXCEPTION",
                 "AddMessage in viewModel: Caught $exception with suppressed ${exception.suppressed.contentToString()}")
 
         }) {
-            messageRepository.insertMessage(messageEntity).observe(lifecycleOwner, Observer { message ->
+            messageRepository.insertMessage(message).observe(lifecycleOwner, Observer { message ->
                 message?.let {
                     Log.i("MessagesListTag", "insertMessage: $it")
                     messageList.add(0, it)

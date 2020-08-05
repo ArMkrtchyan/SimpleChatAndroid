@@ -3,12 +3,15 @@ package simplechat.main.repository
 import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import simplechat.main.database.dao.ChatDao
+import simplechat.main.SimpleChatApplication
 import simplechat.main.database.entity.ChatEntity
 import simplechat.main.database.mappers.ChatsMapper
 import simplechat.main.models.Chat
 
-class ChatRepository(private val chatDao: ChatDao) {
+class ChatRepository {
+
+    private val chatDao = SimpleChatApplication.getInstance().getChatDb().chatDao()
+
     suspend fun insertChat(chat: ChatEntity): MutableLiveData<ArrayList<Chat>> {
         val chatsLiveData = MutableLiveData(ArrayList<Chat>())
         withContext(Dispatchers.IO) { chatDao.insert(chat) }
