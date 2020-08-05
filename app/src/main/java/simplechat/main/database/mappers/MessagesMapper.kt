@@ -6,7 +6,7 @@ import simplechat.main.models.Message
 object MessagesMapper {
     fun messageEntityToMessage(messageEntity: MessageEntity): Message {
         return Message(messageEntity.id, messageEntity.chatId, messageEntity.message, messageEntity.createdAt,
-            messageEntity.typedUserId, messageEntity.messageType, false, "")
+            messageEntity.typedUserId, messageEntity.messageType, false, "", "")
     }
 
     fun messageEntitiesToMessages(messageEntities: List<MessageEntity>): ArrayList<Message> {

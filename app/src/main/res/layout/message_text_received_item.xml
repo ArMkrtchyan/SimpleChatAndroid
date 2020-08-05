@@ -48,6 +48,17 @@
             android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/profile_photo"
-            app:layout_constraintWidth_max="300dp" />
+            app:layout_constraintWidth_max="280dp" />
+
+
+        <TextView
+            android:id="@+id/time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@{message.time}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/message_text" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

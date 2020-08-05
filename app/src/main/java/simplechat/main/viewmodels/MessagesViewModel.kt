@@ -82,10 +82,10 @@ class MessagesViewModel : BaseViewModel() {
                     Log.i("MessagesListTag", "insertMessage: $it")
                     messageList.add(0, it)
                     setMessageListLiveData(messageList)
-                    chatRepository.updateChat(ChatsMapper.chatToChatEntity(chat))
                     success.value = true
                 }
             })
+            chatRepository.updateChat(ChatsMapper.chatToChatEntity(chat))
         }
         return success
     }

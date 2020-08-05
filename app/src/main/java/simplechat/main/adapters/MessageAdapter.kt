@@ -74,6 +74,7 @@ class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnMessageClickListene
             var date = "date"
             data.asReversed().map { message ->
                 message.day = setDate(message.createdAt)
+                message.time = setTime(message.createdAt)
                 if (message.day != date) {
                     message.isDateMustShow = true
                     date = message.day
@@ -95,5 +96,10 @@ class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnMessageClickListene
     private fun setDate(updatedAt: String): String {
         val date = Utils.parseStringToDate(updatedAt)
         return SimpleDateFormat("EEE, dd MMM", Locale("en")).format(date)
+    }
+
+    private fun setTime(updatedAt: String): String {
+        val date = Utils.parseStringToDate(updatedAt)
+        return SimpleDateFormat("HH:mm", Locale("en")).format(date)
     }
 }
