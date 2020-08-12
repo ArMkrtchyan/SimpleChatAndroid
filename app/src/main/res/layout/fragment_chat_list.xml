@@ -11,7 +11,7 @@
 
         <variable
             name="onChatClickListener"
-            type="simplechat.main.adapters.OnChatClickListener" />
+            type="simplechat.main.adapters.OnItemClickListener" />
     </data>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout

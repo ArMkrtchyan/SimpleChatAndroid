@@ -1,39 +1,40 @@
 package simplechat.main.repository
 
-import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import simplechat.main.SimpleChatApplication
 import simplechat.main.database.entity.MessageEntity
 import simplechat.main.database.mappers.MessagesMapper
 import simplechat.main.models.Message
 
+@ExperimentalCoroutinesApi
 class MessageRepository {
 
     private val messageDao = SimpleChatApplication.getInstance().getChatDb().messageDao()
 
-    suspend fun insertMessage(message: Message): MutableLiveData<Message> {
-        val messagesLiveData = MutableLiveData<Message>()
-        withContext(Dispatchers.IO) { messageDao.insert(MessagesMapper.messageToMessageEntity(message)) }
-        val mMessage = withContext(Dispatchers.IO) { messageDao.getLastMessage(message.chatId) }
-        messagesLiveData.postValue(MessagesMapper.messageEntityToMessage(mMessage))
-        return messagesLiveData
-
+    suspend fun insertMessage(message: Message): Flow<Message> {
+        return flow {
+            emit(MessagesMapper.messageEntityToMessage(messageDao.getLastMessage(message.chatId)))
+        }.flowOn(Dispatchers.IO).onStart {
+            messageDao.insert(MessagesMapper.messageToMessageEntity(message))
+        }
     }
 
-    suspend fun insertMessages(messages: List<MessageEntity>, chatId: Int): MutableLiveData<ArrayList<Message>> {
-        val messagesLiveData = MutableLiveData(ArrayList<Message>())
-        withContext(Dispatchers.IO) { messageDao.insertMessages(messages) }
-        messagesLiveData.postValue(
-            MessagesMapper.messageEntitiesToMessages(withContext(Dispatchers.IO) { messageDao.getAllMessages(chatId) }))
-        return messagesLiveData
-
+    suspend fun insertMessages(messages: List<MessageEntity>, chatId: Int): Flow<ArrayList<Message>> {
+        return flow {
+            emit(MessagesMapper.messageEntitiesToMessages(messageDao.getAllMessages(chatId)))
+        }.flowOn(Dispatchers.IO).onStart {
+            messageDao.insertMessages(messages)
+        }
     }
 
-    suspend fun findAllMessages(chatId: Int): MutableLiveData<ArrayList<Message>> {
-        val messagesLiveData = MutableLiveData(ArrayList<Message>())
-        messagesLiveData.postValue(
-            MessagesMapper.messageEntitiesToMessages(withContext(Dispatchers.IO) { messageDao.getAllMessages(chatId) }))
-        return messagesLiveData
+    suspend fun findAllMessages(chatId: Int): Flow<ArrayList<Message>> {
+        return flow {
+            emit(MessagesMapper.messageEntitiesToMessages(messageDao.getAllMessages(chatId)))
+        }.flowOn(Dispatchers.IO)
     }
 }

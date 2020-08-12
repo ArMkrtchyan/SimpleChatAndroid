@@ -13,8 +13,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.google.gson.Gson
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import simplechat.main.databinding.FragmentMessagesBinding
 import simplechat.main.fragments.base.BaseFragment
 import simplechat.main.interfacies.MessageOptionsCallback
@@ -26,6 +30,7 @@ import simplechat.main.viewmodels.MessagesViewModel
 import java.util.*
 
 
+@ExperimentalCoroutinesApi
 class MessagesFragment : BaseFragment(), MessageOptionsCallback {
 
     companion object {
@@ -102,16 +107,16 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
         dataBinding.send.setOnClickListener {
             Log.i("ChatListTag", "chat: " + chat.toString())
             chat?.lastMessageDate = Utils.dateToStringWithTimeZone(Date()) ?: ""
-            if (dataBinding.inputField.text.toString().isNotEmpty()) viewModel.addMessage(
-                Message(0, chat?.id ?: 0, dataBinding.inputField.text.toString().trim(), Utils.dateToStringWithTimeZone(Date()) ?: "",
-                    0, 1, false, "", "", ""), chat!!).observe(this, androidx.lifecycle.Observer { success ->
-                success?.let {
+            lifecycleScope.launch {
+                if (dataBinding.inputField.text.toString().isNotEmpty()) viewModel.addMessage(
+                    Message(0, chat?.id ?: 0, dataBinding.inputField.text.toString().trim(),
+                        Utils.dateToStringWithTimeZone(Date()) ?: "", 0, 1, false, "", "", ""), chat!!).collect {
                     if (it) {
                         dataBinding.inputField.setText("")
                         dataBinding.messagesRecycler.scrollToPosition(0)
                     }
                 }
-            })
+            }
         }
 
         dataBinding.moreReceived.setOnClickListener {
@@ -122,17 +127,16 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
         dataBinding.sendReceived.setOnClickListener {
             Log.i("ChatListTag", "chat: " + chat.toString())
             chat?.lastMessageDate = Utils.dateToStringWithTimeZone(Date()) ?: ""
-            if (dataBinding.inputFieldReceived.text.toString().isNotEmpty()) viewModel.addMessage(
-                Message(0, chat?.id ?: 0, dataBinding.inputFieldReceived.text.toString().trim(),
-                    Utils.dateToStringWithTimeZone(Date()) ?: "", 0, 2, false, "", "", ""), chat!!)
-                .observe(this, androidx.lifecycle.Observer { success ->
-                    success?.let {
-                        if (it) {
-                            dataBinding.inputFieldReceived.setText("")
-                            dataBinding.messagesRecycler.scrollToPosition(0)
-                        }
+            lifecycleScope.launch {
+                if (dataBinding.inputFieldReceived.text.toString().isNotEmpty()) viewModel.addMessage(
+                    Message(0, chat?.id ?: 0, dataBinding.inputFieldReceived.text.toString().trim(),
+                        Utils.dateToStringWithTimeZone(Date()) ?: "", 0, 2, false, "", "", ""), chat!!).collect {
+                    if (it) {
+                        dataBinding.inputFieldReceived.setText("")
+                        dataBinding.messagesRecycler.scrollToPosition(0)
                     }
-                })
+                }
+            }
         }
     }
 
@@ -148,10 +152,10 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
             requestPermissions(arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE),
                 GALLERY_PERMISSION_REQUEST_CODE)
         } else {
+            //  startActivityForResult(Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI), GALLERY_REQUEST_CODE)
             startActivityForResult(Intent.createChooser(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 type = "image/*"
             }, "Select Picture"), GALLERY_REQUEST_CODE)
-
         }
     }
 
@@ -181,6 +185,8 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
         when (requestCode) {
             GALLERY_PERMISSION_REQUEST_CODE -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //                    startActivityForResult(Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
+                    //                        GALLERY_REQUEST_CODE)
                     startActivityForResult(Intent.createChooser(Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                         type = "image/*"
                     }, "Select Picture"), GALLERY_REQUEST_CODE)
@@ -209,16 +215,15 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
                     Activity.RESULT_OK -> {
                         data?.let {
                             if (it.data != null) {
-                                viewModel.addMessage(Message(0, chat?.id ?: 0, "", Utils.dateToStringWithTimeZone(Date()) ?: "", 0,
-                                    if (isForSend) 3 else 4, false, "", "", it.data!!.toString()), chat!!)
-                                    .observe(this, androidx.lifecycle.Observer { success ->
-                                        success?.let {
-                                            if (it) {
-                                                dataBinding.inputFieldReceived.setText("")
-                                                dataBinding.messagesRecycler.scrollToPosition(0)
-                                            }
+                                lifecycleScope.launch {
+                                    viewModel.addMessage(Message(0, chat?.id ?: 0, "", Utils.dateToStringWithTimeZone(Date()) ?: "", 0,
+                                        if (isForSend) 3 else 4, false, "", "", it.data!!.toString()), chat!!).collect {
+                                        if (it) {
+                                            dataBinding.inputFieldReceived.setText("")
+                                            dataBinding.messagesRecycler.scrollToPosition(0)
                                         }
-                                    })
+                                    }
+                                }
                             }
                         }
                     }
@@ -231,17 +236,13 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
                     Activity.RESULT_OK -> {
                         data?.let {
                             if (it.data != null) {
-                                viewModel.addMessage(Message(0, chat?.id ?: 0, "", Utils.dateToStringWithTimeZone(Date()) ?: "", 0,
-                                    if (isForSend) 5 else 6, false, "", "", it.data!!.toString()), chat!!)
-                                    .observe(this, androidx.lifecycle.Observer { success ->
-                                        success?.let {
-                                            if (it) {
-                                                dataBinding.inputFieldReceived.setText("")
-                                                dataBinding.messagesRecycler.scrollToPosition(0)
-
-                                            }
-                                        }
-                                    })
+                                lifecycleScope.launch {
+                                    viewModel.addMessage(Message(0, chat?.id ?: 0, "", Utils.dateToStringWithTimeZone(Date()) ?: "", 0,
+                                        if (isForSend) 5 else 6, false, "", "", it.data!!.toString()), chat!!).collect {
+                                        dataBinding.inputFieldReceived.setText("")
+                                        dataBinding.messagesRecycler.scrollToPosition(0)
+                                    }
+                                }
                             }
                         }
                     }

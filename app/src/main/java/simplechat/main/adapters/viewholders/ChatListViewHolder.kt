@@ -1,18 +1,19 @@
 package simplechat.main.adapters.viewholders
 
-import simplechat.main.adapters.OnChatClickListener
+import simplechat.main.adapters.OnItemClickListener
 import simplechat.main.adapters.base.BaseViewHolder
 import simplechat.main.databinding.ChatListItemBinding
 import simplechat.main.models.Chat
 
-class ChatListViewHolder(private val dataBinding: ChatListItemBinding) : BaseViewHolder<Chat, OnChatClickListener>(dataBinding.root) {
-    override fun bind(item: Chat, onClickListener: OnChatClickListener?) {
+class ChatListViewHolder(private val dataBinding: ChatListItemBinding) :
+    BaseViewHolder<Chat, OnItemClickListener<Chat>>(dataBinding.root) {
+    override fun bind(item: Chat, onClickListener: OnItemClickListener<Chat>?) {
         dataBinding.chat = item
         dataBinding.root.setOnClickListener {
-            onClickListener?.onChatClick(item)
+            onClickListener?.onItemClick(dataBinding.root, adapterPosition, item)
         }
         dataBinding.root.setOnLongClickListener {
-            onClickListener?.onChatLongClick(item)
+            onClickListener?.onItemLongClick(dataBinding.root, adapterPosition, item)
             false
         }
     }

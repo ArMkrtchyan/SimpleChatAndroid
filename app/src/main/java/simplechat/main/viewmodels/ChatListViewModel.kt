@@ -2,7 +2,12 @@ package simplechat.main.viewmodels
 
 import android.content.Context
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import simplechat.main.adapters.ChatListAdapter
 import simplechat.main.database.entity.ChatEntity
@@ -10,6 +15,7 @@ import simplechat.main.database.mappers.ChatsMapper
 import simplechat.main.models.Chat
 import simplechat.main.repository.ChatRepository
 
+@ExperimentalCoroutinesApi
 class ChatListViewModel : ViewModel() {
 
     private lateinit var context: Context
@@ -27,7 +33,7 @@ class ChatListViewModel : ViewModel() {
         return chatListLiveData
     }
 
-    fun setChatListLiveData(data: ArrayList<Chat>) {
+    private fun setChatListLiveData(data: ArrayList<Chat>) {
         chatListLiveData.value = data
     }
 
@@ -41,66 +47,52 @@ class ChatListViewModel : ViewModel() {
 
     fun getChats() {
         viewModelScope.launch {
-            chatsRepository.findAllChats().observe(lifecycleOwner, Observer {
+            chatsRepository.findAllChats().collect {
                 chatList.clear()
                 chatList.addAll(it)
                 Log.i("ChatListTag", chatList.toString())
                 setChatListLiveData(chatList)
-            })
-        }
-    }
-
-    fun addChats() {
-        viewModelScope.launch {
-            chatsRepository.insertChats(ChatsMapper.chatsToChatEntities(ArrayList<Chat>().apply {
-                for (i in 0 until 30) {
-                    add(Chat(i, "user number $i", "", false, ""))
-                }
-            })).observe(lifecycleOwner, Observer {
-                setChatListLiveData(it)
-            })
+            }
         }
     }
 
     fun addChat(chatEntity: ChatEntity) {
         viewModelScope.launch {
-            chatsRepository.insertChat(chatEntity).observe(lifecycleOwner, Observer {
+            chatsRepository.insertChat(chatEntity).collect {
                 chatList.clear()
                 chatList.addAll(it)
                 Log.i("ChatListTag", chatList.toString())
                 setChatListLiveData(chatList)
-            })
+            }
         }
     }
 
     fun updateChat(chat: ChatEntity) {
         viewModelScope.launch {
-            chatsRepository.updateChat(chat).observe(lifecycleOwner, Observer { success ->
-                success?.let {
-                    for (i in 0 until chatList.size) {
-                        if (chatList[i].id == ChatsMapper.chatEntityToChat(chat).id) {
-                            chatList[i] = ChatsMapper.chatEntityToChat(chat)
-                            break
-                        }
+            chatsRepository.updateChat(chat).collect {
+                for (i in 0 until chatList.size) {
+                    if (chatList[i].id == ChatsMapper.chatEntityToChat(chat).id) {
+                        chatList[i] = ChatsMapper.chatEntityToChat(chat)
+                        break
                     }
-                    chatList.run {
-                        sortWith(Comparator { o1, o2 -> o2.lastMessageDate.compareTo(o1.lastMessageDate) })
-                    }
-                    Log.i("ChatListTag", chatList.toString())
-                    setChatListLiveData(chatList)
                 }
-            })
+                chatList.run {
+                    sortWith(Comparator { o1, o2 -> o2.lastMessageDate.compareTo(o1.lastMessageDate) })
+                }
+                Log.i("ChatListTag", chatList.toString())
+                setChatListLiveData(chatList)
+            }
         }
     }
 
     fun deleteChat(chat: ChatEntity) {
         viewModelScope.launch {
-            chatsRepository.deleteChat(chat).observe(lifecycleOwner, Observer {
+            chatsRepository.deleteChat(chat).collect {
                 chatList.clear()
                 chatList.addAll(it)
                 Log.i("ChatListTag", chatList.toString())
                 setChatListLiveData(chatList)
-            })
+            }
         }
     }
 }

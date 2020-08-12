@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
-class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnMessageClickListener>, Message, OnMessageClickListener>() {
+class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnItemClickListener<Message>>, Message, OnItemClickListener<Message>>() {
 
     private val typeMessageSend = 1
     private val typeMessageReceived = 2
@@ -25,9 +25,9 @@ class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnMessageClickListene
     private val typeMessageFileReceived = 6
 
     private val data = ArrayList<Message>()
-    private var onMessageClickListener: OnMessageClickListener? = null
+    private var onItemClickListener: OnItemClickListener<Message>? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<Message, OnMessageClickListener> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<Message, OnItemClickListener<Message>> {
         return when (viewType) {
             typeMessageSend -> {
                 MessageTextSendViewHolder(MessageTextSendItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
@@ -62,8 +62,8 @@ class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnMessageClickListene
         return data[position].messageType
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder<Message, OnMessageClickListener>, position: Int) {
-        holder.bind(data[position], onMessageClickListener)
+    override fun onBindViewHolder(holder: BaseViewHolder<Message, OnItemClickListener<Message>>, position: Int) {
+        holder.bind(data[position], onItemClickListener)
     }
 
     override fun setItems(items: List<Message>?) {
@@ -89,8 +89,8 @@ class MessageAdapter : BaseAdapter<BaseViewHolder<Message, OnMessageClickListene
         }
     }
 
-    override fun setListener(listener: OnMessageClickListener?) {
-        onMessageClickListener = listener
+    override fun setListener(listener: OnItemClickListener<Message>?) {
+        onItemClickListener = listener
     }
 
     private fun setDate(updatedAt: String): String {

@@ -11,18 +11,18 @@ import simplechat.main.adapters.viewholders.ChatListViewHolder
 import simplechat.main.databinding.ChatListItemBinding
 import simplechat.main.models.Chat
 
-class ChatListAdapter : BaseAdapter<BaseViewHolder<Chat, OnChatClickListener>, Chat, OnChatClickListener>() {
+class ChatListAdapter : BaseAdapter<BaseViewHolder<Chat, OnItemClickListener<Chat>>, Chat, OnItemClickListener<Chat>>() {
 
     private val data = ArrayList<Chat>()
-    private var onChatClickListener: OnChatClickListener? = null
+    private var onChatClickListener: OnItemClickListener<Chat>? = null
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<Chat, OnChatClickListener> {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<Chat, OnItemClickListener<Chat>> {
         return ChatListViewHolder(ChatListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun getItemCount() = data.size
 
-    override fun onBindViewHolder(holder: BaseViewHolder<Chat, OnChatClickListener>, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder<Chat, OnItemClickListener<Chat>>, position: Int) {
         holder.bind(data[position], onChatClickListener)
     }
 
@@ -38,7 +38,7 @@ class ChatListAdapter : BaseAdapter<BaseViewHolder<Chat, OnChatClickListener>, C
         }
     }
 
-    override fun setListener(listener: OnChatClickListener?) {
+    override fun setListener(listener: OnItemClickListener<Chat>?) {
         onChatClickListener = listener
     }
 

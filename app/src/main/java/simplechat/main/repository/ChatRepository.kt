@@ -1,50 +1,61 @@
 package simplechat.main.repository
 
-import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import simplechat.main.SimpleChatApplication
 import simplechat.main.database.entity.ChatEntity
 import simplechat.main.database.mappers.ChatsMapper
 import simplechat.main.models.Chat
 
+@ExperimentalCoroutinesApi
 class ChatRepository {
 
     private val chatDao = SimpleChatApplication.getInstance().getChatDb().chatDao()
+    private val messageDao = SimpleChatApplication.getInstance().getChatDb().messageDao()
 
-    suspend fun insertChat(chat: ChatEntity): MutableLiveData<ArrayList<Chat>> {
-        val chatsLiveData = MutableLiveData(ArrayList<Chat>())
-        withContext(Dispatchers.IO) { chatDao.insert(chat) }
-        chatsLiveData.postValue(ChatsMapper.chatEntitiesToChats(withContext(Dispatchers.IO) { chatDao.getAllChats() }))
-        return chatsLiveData
+    fun insertChat(chat: ChatEntity): Flow<ArrayList<Chat>> {
+        return flow {
+            emit(ChatsMapper.chatEntitiesToChats(chatDao.getAllChats()))
+        }.onStart {
+            chatDao.insert(chat)
+        }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun insertChats(chats: List<ChatEntity>): MutableLiveData<ArrayList<Chat>> {
-        val chatsLiveData = MutableLiveData(ArrayList<Chat>())
-        withContext(Dispatchers.IO) { chatDao.insertChats(chats) }
-        chatsLiveData.postValue(ChatsMapper.chatEntitiesToChats(withContext(Dispatchers.IO) { chatDao.getAllChats() }))
-        return chatsLiveData
+    fun insertChats(chats: List<ChatEntity>): Flow<ArrayList<Chat>> {
+        return flow {
+            emit(ChatsMapper.chatEntitiesToChats(chatDao.getAllChats()))
+        }.onStart {
+            chatDao.insertChats(chats)
+        }.flowOn(Dispatchers.IO)
 
     }
 
-    suspend fun findAllChats(): MutableLiveData<ArrayList<Chat>> {
-        val chatsLiveData = MutableLiveData(ArrayList<Chat>())
-        chatsLiveData.postValue(ChatsMapper.chatEntitiesToChats(withContext(Dispatchers.IO) { chatDao.getAllChats() }))
-        return chatsLiveData
+    fun findAllChats(): Flow<ArrayList<Chat>> {
+        return flow {
+            emit(ChatsMapper.chatEntitiesToChats(chatDao.getAllChats()))
+        }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun updateChat(chat: ChatEntity): MutableLiveData<Boolean> {
-        val chatsLiveData = MutableLiveData<Boolean>()
-        withContext(Dispatchers.IO) { chatDao.updateChat(chat) }
-        chatsLiveData.postValue(true)
-        return chatsLiveData
+    fun updateChat(chat: ChatEntity): Flow<Boolean> {
+        return flow {
+            emit(true)
+        }.onStart {
+            chatDao.updateChat(chat)
+        }.flowOn(Dispatchers.IO)
     }
 
-    suspend fun deleteChat(chat: ChatEntity): MutableLiveData<ArrayList<Chat>> {
-        val chatsLiveData = MutableLiveData(ArrayList<Chat>())
-        withContext(Dispatchers.IO) { chatDao.deleteChat(chat) }
-        chatsLiveData.postValue(ChatsMapper.chatEntitiesToChats(withContext(Dispatchers.IO) { chatDao.getAllChats() }))
-        return chatsLiveData
+    fun deleteChat(chat: ChatEntity): Flow<ArrayList<Chat>> {
+        return flow {
+            emit(ChatsMapper.chatEntitiesToChats(chatDao.getAllChats()))
+        }.onStart {
+            chatDao.deleteChat(chat)
+            messageDao.deleteMessagesWithChatId(chat.id)
+        }.flowOn(Dispatchers.IO)
+
     }
 
 }

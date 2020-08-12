@@ -22,4 +22,7 @@ interface MessageDao {
 
     @Query(value = "SELECT * FROM messages WHERE chat_id = (:chatId) ORDER BY id DESC LIMIT 1")
     suspend fun getLastMessage(chatId: Int): MessageEntity
+
+    @Query(value = "DELETE FROM messages WHERE chat_id = (:chatId)")
+    suspend fun deleteMessagesWithChatId(chatId: Int)
 }

@@ -4,9 +4,12 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import simplechat.main.adapters.MessageAdapter
 import simplechat.main.database.mappers.ChatsMapper
@@ -16,6 +19,7 @@ import simplechat.main.repository.ChatRepository
 import simplechat.main.repository.MessageRepository
 import simplechat.main.viewmodels.base.BaseViewModel
 
+@ExperimentalCoroutinesApi
 class MessagesViewModel : BaseViewModel() {
     private lateinit var context: Context
     private val messageRepository by lazy { MessageRepository() }
@@ -33,7 +37,7 @@ class MessagesViewModel : BaseViewModel() {
         return messageListLiveData
     }
 
-    fun setMessageListLiveData(data: ArrayList<Message>) {
+    private fun setMessageListLiveData(data: ArrayList<Message>) {
         messageListLiveData.value = data
     }
 
@@ -48,43 +52,29 @@ class MessagesViewModel : BaseViewModel() {
 
     fun getMessages(chat: Chat) {
         viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            Log.e("DBEXCEPTION",
-                "getMessage in viewModel: Caught $exception with suppressed ${exception.suppressed.contentToString()}")
+            Log.e("DBEXCEPTION", "getMessage in viewModel: Caught $exception with suppressed ${exception.suppressed.contentToString()}")
 
         }) {
             Log.i("MessagesListTag", "getMessages-> chatId: ${chat.id}")
-            messageRepository.findAllMessages(chat.id).observe(lifecycleOwner, Observer {
+            messageRepository.findAllMessages(chat.id).collect {
                 Log.i("MessagesListTag", "getMessages: $it")
                 messageList.clear()
                 messageList.addAll(it)
                 setMessageListLiveData(messageList)
-            })
+            }
         }
     }
 
-    fun addMessages() {
-        viewModelScope.launch {
 
+    fun addMessage(message: Message, chat: Chat): Flow<Boolean> {
+        return flow {
+            messageRepository.insertMessage(message).collect {
+                Log.i("MessagesListTag", "insertMessage: $it")
+                messageList.add(0, it)
+                setMessageListLiveData(messageList)
+                emit(true)
+            }
+            chatRepository.updateChat(ChatsMapper.chatToChatEntity(chat)).collect { }
         }
-    }
-
-    fun addMessage(message: Message, chat: Chat): MutableLiveData<Boolean> {
-        val success = MutableLiveData<Boolean>()
-        viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            Log.e("DBEXCEPTION",
-                "AddMessage in viewModel: Caught $exception with suppressed ${exception.suppressed.contentToString()}")
-
-        }) {
-            messageRepository.insertMessage(message).observe(lifecycleOwner, Observer { message ->
-                message?.let {
-                    Log.i("MessagesListTag", "insertMessage: $it")
-                    messageList.add(0, it)
-                    setMessageListLiveData(messageList)
-                    success.value = true
-                }
-            })
-            chatRepository.updateChat(ChatsMapper.chatToChatEntity(chat))
-        }
-        return success
     }
 }
