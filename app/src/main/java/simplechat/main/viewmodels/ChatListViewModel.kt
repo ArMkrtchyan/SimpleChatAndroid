@@ -47,51 +47,60 @@ class ChatListViewModel : ViewModel() {
 
     fun getChats() {
         viewModelScope.launch {
-            chatsRepository.findAllChats().collect {
-                chatList.clear()
-                chatList.addAll(it)
-                Log.i("ChatListTag", chatList.toString())
-                setChatListLiveData(chatList)
+            chatsRepository.findAllChats { flow ->
+                flow.collect {
+                    chatList.clear()
+                    chatList.addAll(it)
+                    Log.i("ChatListTag", chatList.toString())
+                    setChatListLiveData(chatList)
+                }
+
             }
         }
     }
 
     fun addChat(chatEntity: ChatEntity) {
         viewModelScope.launch {
-            chatsRepository.insertChat(chatEntity).collect {
-                chatList.clear()
-                chatList.addAll(it)
-                Log.i("ChatListTag", chatList.toString())
-                setChatListLiveData(chatList)
+            chatsRepository.insertChat(chatEntity) { flow ->
+                flow.collect {
+                    chatList.clear()
+                    chatList.addAll(it)
+                    Log.i("ChatListTag", chatList.toString())
+                    setChatListLiveData(chatList)
+                }
             }
         }
     }
 
     fun updateChat(chat: ChatEntity) {
         viewModelScope.launch {
-            chatsRepository.updateChat(chat).collect {
-                for (i in 0 until chatList.size) {
-                    if (chatList[i].id == ChatsMapper.chatEntityToChat(chat).id) {
-                        chatList[i] = ChatsMapper.chatEntityToChat(chat)
-                        break
+            chatsRepository.updateChat(chat) { flow ->
+                flow.collect {
+                    for (i in 0 until chatList.size) {
+                        if (chatList[i].id == ChatsMapper.chatEntityToChat(chat).id) {
+                            chatList[i] = ChatsMapper.chatEntityToChat(chat)
+                            break
+                        }
                     }
+                    chatList.run {
+                        sortWith(Comparator { o1, o2 -> o2.lastMessageDate.compareTo(o1.lastMessageDate) })
+                    }
+                    Log.i("ChatListTag", chatList.toString())
+                    setChatListLiveData(chatList)
                 }
-                chatList.run {
-                    sortWith(Comparator { o1, o2 -> o2.lastMessageDate.compareTo(o1.lastMessageDate) })
-                }
-                Log.i("ChatListTag", chatList.toString())
-                setChatListLiveData(chatList)
             }
         }
     }
 
     fun deleteChat(chat: ChatEntity) {
         viewModelScope.launch {
-            chatsRepository.deleteChat(chat).collect {
-                chatList.clear()
-                chatList.addAll(it)
-                Log.i("ChatListTag", chatList.toString())
-                setChatListLiveData(chatList)
+            chatsRepository.deleteChat(chat) { flow ->
+                flow.collect {
+                    chatList.clear()
+                    chatList.addAll(it)
+                    Log.i("ChatListTag", chatList.toString())
+                    setChatListLiveData(chatList)
+                }
             }
         }
     }

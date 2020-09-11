@@ -62,16 +62,10 @@ class ChatListFragment : BaseFragment(), OnItemClickListener<Chat> {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dataBinding.addNewChat.setOnClickListener {
-            DialogUtil.addChatDialog(requireActivity(), object : DialogUtil.AddChatCallback {
-                override fun addChat(chat: ChatEntity) {
-                    viewModel.addChat(chat)
-                    dataBinding.chatListRecycler.scrollToPosition(0)
-                }
-
-                override fun editChat(chat: ChatEntity) {
-
-                }
-            })
+            DialogUtil.addChatDialog(requireActivity()) { chatEntity ->
+                viewModel.addChat(chatEntity)
+                dataBinding.chatListRecycler.scrollToPosition(0)
+            }
         }
     }
 
@@ -83,7 +77,7 @@ class ChatListFragment : BaseFragment(), OnItemClickListener<Chat> {
 
     override fun onItemClick(view: View, position: Int, item: Chat) {
         if (navController.currentDestination?.id == R.id.chatListFragment) navController.navigate(
-            ChatListFragmentDirections.actionChatListFragmentToMessagesFragment(Gson().toJson(item)))
+            ChatListFragmentDirections.actionChatListFragmentToMessagesFragment(Utils.parseObjectToString(item)))
     }
 
     override fun onItemLongClick(view: View, position: Int, item: Chat) {
@@ -100,16 +94,10 @@ class ChatListFragment : BaseFragment(), OnItemClickListener<Chat> {
 
     override fun editItem(view: View, position: Int, item: Chat) {
         chatOptionsDialogFragment.dismiss()
-        DialogUtil.editChatDialog(item, requireActivity(), object : DialogUtil.AddChatCallback {
-            override fun addChat(chat: ChatEntity) {
-
-            }
-
-            override fun editChat(chat: ChatEntity) {
-                chat.lastMessageDate = Utils.dateToStringWithTimeZone(Date()) ?: ""
-                viewModel.updateChat(chat)
-                dataBinding.chatListRecycler.scrollToPosition(0)
-            }
-        })
+        DialogUtil.editChatDialog(item, requireActivity()) { chatEntity ->
+            chatEntity.lastMessageDate = Utils.dateToStringWithTimeZone(Date()) ?: ""
+            viewModel.updateChat(chatEntity)
+            dataBinding.chatListRecycler.scrollToPosition(0)
+        }
     }
 }

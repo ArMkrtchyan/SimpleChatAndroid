@@ -51,30 +51,33 @@ class MessagesViewModel : BaseViewModel() {
 
 
     fun getMessages(chat: Chat) {
-        viewModelScope.launch(CoroutineExceptionHandler { _, exception ->
-            Log.e("DBEXCEPTION", "getMessage in viewModel: Caught $exception with suppressed ${exception.suppressed.contentToString()}")
-
-        }) {
+        viewModelScope.launch {
             Log.i("MessagesListTag", "getMessages-> chatId: ${chat.id}")
-            messageRepository.findAllMessages(chat.id).collect {
-                Log.i("MessagesListTag", "getMessages: $it")
-                messageList.clear()
-                messageList.addAll(it)
-                setMessageListLiveData(messageList)
+            messageRepository.findAllMessages(chat.id) { flow ->
+                flow.collect {
+                    Log.i("MessagesListTag", "getMessages: $it")
+                    messageList.clear()
+                    messageList.addAll(it)
+                    setMessageListLiveData(messageList)
+                }
             }
         }
     }
 
 
-    fun addMessage(message: Message, chat: Chat): Flow<Boolean> {
-        return flow {
-            messageRepository.insertMessage(message).collect {
-                Log.i("MessagesListTag", "insertMessage: $it")
-                messageList.add(0, it)
-                setMessageListLiveData(messageList)
-                emit(true)
+   suspend fun addMessage(message: Message, chat: Chat, mFlow: suspend (Flow<Boolean>) -> Unit) {
+        mFlow(flow {
+            messageRepository.insertMessage(message) { flow ->
+                flow.collect {
+                    Log.i("MessagesListTag", "insertMessage: $it")
+                    messageList.add(0, it)
+                    setMessageListLiveData(messageList)
+                    emit(true)
+                }
+                chatRepository.updateChat(ChatsMapper.chatToChatEntity(chat)) { flow ->
+                    flow.collect { }
+                }
             }
-            chatRepository.updateChat(ChatsMapper.chatToChatEntity(chat)).collect { }
-        }
+        })
     }
 }

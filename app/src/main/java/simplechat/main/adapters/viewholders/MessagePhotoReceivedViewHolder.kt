@@ -2,10 +2,16 @@ package simplechat.main.adapters.viewholders
 
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.request.transition.Transition
 import simplechat.main.adapters.OnItemClickListener
 import simplechat.main.adapters.base.BaseViewHolder
 import simplechat.main.databinding.MessagePhotoReceivedItemBinding
@@ -19,23 +25,18 @@ class MessagePhotoReceivedViewHolder(private val dataBinding: MessagePhotoReceiv
     BaseViewHolder<Message, OnItemClickListener<Message>>(dataBinding.root) {
     override fun bind(item: Message, onClickListener: OnItemClickListener<Message>?) {
         dataBinding.message = item
-        val mBitmap = if (Build.VERSION.SDK_INT < 28) {
-            MediaStore.Images.Media.getBitmap(dataBinding.root.context.contentResolver, Uri.parse(item.uri))
-        } else {
-            val source = ImageDecoder.createSource(dataBinding.root.context.contentResolver, Uri.parse(item.uri))
-            ImageDecoder.decodeBitmap(source)
-
+        Glide.with(dataBinding.root.context).load(Uri.parse(item.uri)).into(object : SimpleTarget<Drawable>() {
+            override fun onResourceReady(resource: Drawable, transition: Transition<in Drawable>?) {
+                val bitmap = (resource as BitmapDrawable).bitmap
+                val ratio = (bitmap.height.toDouble() / bitmap.width)
+                val height = 512f * ratio
+                Log.i("MPhototag", "width: ${bitmap.width} height: ${bitmap.height} ratio: $ratio")
+                Glide.with(dataBinding.root.context).load(bitmap).apply(RequestOptions().override(512, height.toInt()))
+                    .into(dataBinding.image)
+            }
+        })
+        dataBinding.root.setOnClickListener {
+            onClickListener?.onItemClick(dataBinding.image, adapterPosition, item)
         }
-        val bitmap = Utils.resizeImage(dataBinding.root.context, mBitmap, Uri.parse(item.uri))
-        val file = File(dataBinding.root.context.cacheDir, bitmap.hashCode().toString())
-        file.createNewFile()
-        val bos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100 /*ignored for PNG*/, bos)
-        val bitmapData = bos.toByteArray()
-        val fos = FileOutputStream(file)
-        fos.write(bitmapData)
-        fos.flush()
-        fos.close()
-        Glide.with(dataBinding.root.context).load(bitmap).into(dataBinding.image)
     }
 }

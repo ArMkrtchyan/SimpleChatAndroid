@@ -8,6 +8,10 @@
         <variable
             name="messageViewModel"
             type="simplechat.main.viewmodels.MessagesViewModel" />
+
+        <variable
+            name="onMessageClickListener"
+            type="simplechat.main.adapters.OnItemClickListener" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -52,6 +56,7 @@
                 app:adapter="@{messageViewModel.adapter}"
                 app:items="@{messageViewModel.messageListLiveData}"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:listener="@{onMessageClickListener}"
                 app:reverseLayout="true" />
         </RelativeLayout>
 
@@ -73,10 +78,10 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:background="@drawable/input_field_background"
+            android:hint="Type message for send"
             android:maxLines="6"
             android:minLines="1"
             android:padding="10dp"
-            android:hint="Type message for send"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/send"
             app:layout_constraintHeight_min="40dp"
@@ -113,10 +118,10 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:background="@drawable/input_field_background"
+            android:hint="Type message for receive"
             android:maxLines="6"
             android:minLines="1"
             android:padding="10dp"
-            android:hint="Type message for receive"
             app:layout_constraintBottom_toTopOf="@id/input_field"
             app:layout_constraintEnd_toStartOf="@id/send"
             app:layout_constraintHeight_min="40dp"

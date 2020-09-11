@@ -13,7 +13,7 @@ import simplechat.main.models.Chat
 import java.util.*
 
 object DialogUtil {
-    fun addChatDialog(context: Activity, addChatCallback: AddChatCallback?) {
+    fun addChatDialog(context: Activity, add: (ChatEntity) -> Unit) {
         val dialogBuilder = AlertDialog.Builder(context)
         val dialogBinding = DialogAddChatBinding.inflate(LayoutInflater.from(context), null, false)
         dialogBuilder.setView(dialogBinding.root)
@@ -26,8 +26,7 @@ object DialogUtil {
                 return@setOnClickListener
             }
             alertDialog.dismiss()
-            addChatCallback?.addChat(
-                ChatEntity(0, dialogBinding.inputField.text.toString(), "", false, Utils.dateToStringWithTimeZone(Date()) ?: ""))
+            add(ChatEntity(0, dialogBinding.inputField.text.toString(), "", false, Utils.dateToStringWithTimeZone(Date()) ?: ""))
         }
         dialogBinding.cancel.setOnClickListener {
             alertDialog.dismiss()
@@ -38,7 +37,7 @@ object DialogUtil {
         Utils.showKeyboard(context, dialogBinding.inputField)
     }
 
-    fun editChatDialog(chat: Chat, context: Activity, addChatCallback: AddChatCallback?) {
+    fun editChatDialog(chat: Chat, context: Activity, edit: (ChatEntity) -> Unit) {
         val dialogBuilder = AlertDialog.Builder(context)
         val dialogBinding = DialogAddChatBinding.inflate(LayoutInflater.from(context), null, false)
         dialogBuilder.setView(dialogBinding.root)
@@ -55,9 +54,8 @@ object DialogUtil {
                 return@setOnClickListener
             }
             alertDialog.dismiss()
-            addChatCallback?.editChat(
-                ChatEntity(chat.id, dialogBinding.inputField.text.toString(), chat.userPhoto, chat.isNewMessageContain,
-                    Utils.dateToStringWithTimeZone(Date()) ?: ""))
+            edit(ChatEntity(chat.id, dialogBinding.inputField.text.toString(), chat.userPhoto, chat.isNewMessageContain,
+                Utils.dateToStringWithTimeZone(Date()) ?: ""))
         }
         dialogBinding.cancel.setOnClickListener {
             alertDialog.dismiss()
@@ -67,8 +65,4 @@ object DialogUtil {
         alertDialog.show()
     }
 
-    interface AddChatCallback {
-        fun addChat(chat: ChatEntity)
-        fun editChat(chat: ChatEntity)
-    }
 }

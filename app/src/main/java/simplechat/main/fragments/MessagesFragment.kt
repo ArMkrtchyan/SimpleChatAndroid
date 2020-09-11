@@ -19,6 +19,9 @@ import com.google.gson.Gson
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import simplechat.main.R
+import simplechat.main.activities.ImageActivity
+import simplechat.main.adapters.OnItemClickListener
 import simplechat.main.databinding.FragmentMessagesBinding
 import simplechat.main.fragments.base.BaseFragment
 import simplechat.main.interfacies.MessageOptionsCallback
@@ -31,7 +34,7 @@ import java.util.*
 
 
 @ExperimentalCoroutinesApi
-class MessagesFragment : BaseFragment(), MessageOptionsCallback {
+class MessagesFragment : BaseFragment(), MessageOptionsCallback, OnItemClickListener<Message> {
 
     companion object {
         private const val GALLERY_REQUEST_CODE = 1
@@ -58,9 +61,10 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
         dataBinding = FragmentMessagesBinding.inflate(inflater, container, false).apply {
             lifecycleOwner = viewLifecycleOwner
             messageViewModel = viewModel
+            onMessageClickListener = this@MessagesFragment
         }
         arguments?.let { bundle ->
-            chat = Gson().fromJson(bundle.getString("chat"), Chat::class.java)
+            chat = Utils.parseStringToObject(bundle.getString("chat") ?: "")
             Log.i("ChatListTag", "chat: " + chat.toString())
             chat?.let { it ->
                 dataBinding.toolbar.title = it.userName
@@ -110,10 +114,12 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
             lifecycleScope.launch {
                 if (dataBinding.inputField.text.toString().isNotEmpty()) viewModel.addMessage(
                     Message(0, chat?.id ?: 0, dataBinding.inputField.text.toString().trim(),
-                        Utils.dateToStringWithTimeZone(Date()) ?: "", 0, 1, false, "", "", ""), chat!!).collect {
-                    if (it) {
-                        dataBinding.inputField.setText("")
-                        dataBinding.messagesRecycler.scrollToPosition(0)
+                        Utils.dateToStringWithTimeZone(Date()) ?: "", 0, 1, false, "", "", ""), chat!!) { flow ->
+                    flow.collect {
+                        if (it) {
+                            dataBinding.inputField.setText("")
+                            dataBinding.messagesRecycler.scrollToPosition(0)
+                        }
                     }
                 }
             }
@@ -130,10 +136,12 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
             lifecycleScope.launch {
                 if (dataBinding.inputFieldReceived.text.toString().isNotEmpty()) viewModel.addMessage(
                     Message(0, chat?.id ?: 0, dataBinding.inputFieldReceived.text.toString().trim(),
-                        Utils.dateToStringWithTimeZone(Date()) ?: "", 0, 2, false, "", "", ""), chat!!).collect {
-                    if (it) {
-                        dataBinding.inputFieldReceived.setText("")
-                        dataBinding.messagesRecycler.scrollToPosition(0)
+                        Utils.dateToStringWithTimeZone(Date()) ?: "", 0, 2, false, "", "", ""), chat!!) { flow ->
+                    flow.collect {
+                        if (it) {
+                            dataBinding.inputFieldReceived.setText("")
+                            dataBinding.messagesRecycler.scrollToPosition(0)
+                        }
                     }
                 }
             }
@@ -217,10 +225,12 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
                             if (it.data != null) {
                                 lifecycleScope.launch {
                                     viewModel.addMessage(Message(0, chat?.id ?: 0, "", Utils.dateToStringWithTimeZone(Date()) ?: "", 0,
-                                        if (isForSend) 3 else 4, false, "", "", it.data!!.toString()), chat!!).collect {
-                                        if (it) {
-                                            dataBinding.inputFieldReceived.setText("")
-                                            dataBinding.messagesRecycler.scrollToPosition(0)
+                                        if (isForSend) 3 else 4, false, "", "", it.data!!.toString()), chat!!) { flow ->
+                                        flow.collect {
+                                            if (it) {
+                                                dataBinding.inputFieldReceived.setText("")
+                                                dataBinding.messagesRecycler.scrollToPosition(0)
+                                            }
                                         }
                                     }
                                 }
@@ -238,9 +248,11 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
                             if (it.data != null) {
                                 lifecycleScope.launch {
                                     viewModel.addMessage(Message(0, chat?.id ?: 0, "", Utils.dateToStringWithTimeZone(Date()) ?: "", 0,
-                                        if (isForSend) 5 else 6, false, "", "", it.data!!.toString()), chat!!).collect {
-                                        dataBinding.inputFieldReceived.setText("")
-                                        dataBinding.messagesRecycler.scrollToPosition(0)
+                                        if (isForSend) 5 else 6, false, "", "", it.data!!.toString()), chat!!) { flow ->
+                                        flow.collect {
+                                            dataBinding.inputFieldReceived.setText("")
+                                            dataBinding.messagesRecycler.scrollToPosition(0)
+                                        }
                                     }
                                 }
                             }
@@ -265,5 +277,25 @@ class MessagesFragment : BaseFragment(), MessageOptionsCallback {
                 }
             }
         }
+    }
+
+    override fun onItemClick(view: View, position: Int, item: Message) {
+        when (view.id) {
+            R.id.image -> {
+                startActivity(Intent(requireActivity(), ImageActivity::class.java).putExtra("Image", item.uri))
+            }
+        }
+    }
+
+    override fun onItemLongClick(view: View, position: Int, item: Message) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteItem(view: View, position: Int, item: Message) {
+        TODO("Not yet implemented")
+    }
+
+    override fun editItem(view: View, position: Int, item: Message) {
+        TODO("Not yet implemented")
     }
 }
